@@ -266,28 +266,28 @@ export default {
         // Health check telah dipindah ke health.ex27.my.id
         return new Response(JSON.stringify({ 
           error: "Health check has been moved",
-          new_endpoint: "https://health.ex27.my.id/check",
+          new_endpoint: "https://health.ex27.workers.dev/check",
           message: "Please use the dedicated health worker for better performance"
         }), {
           status: 301,
           headers: {
             ...CORS_HEADER_OPTIONS,
             "Content-Type": "application/json",
-            "Location": "https://health.ex27.my.id" + url.pathname + url.search
+            "Location": "https://health.ex27.workers.dev" + url.pathname + url.search
           },
         });
       } else if (url.pathname.startsWith("/api/v1/check")) {
         // Health check telah dipindah ke health.ex27.my.id
         return new Response(JSON.stringify({ 
           error: "Health check has been moved",
-          new_endpoint: "https://health.ex27.my.id/check",
+          new_endpoint: "https://health.ex27.workers.dev/check",
           message: "Please use the dedicated health worker for better performance"
         }), {
           status: 301,
           headers: {
             ...CORS_HEADER_OPTIONS,
             "Content-Type": "application/json",
-            "Location": "https://health.ex27.my.id/check" + (url.search || "")
+            "Location": "https://health.ex27.workers.dev/check" + (url.search || "")
           },
         });
       } else if (url.pathname.startsWith("/api/config") || 
@@ -1883,7 +1883,7 @@ let baseHTML = `
 
           let isActive = false;
           new Promise(async (resolve) => {
-            const res = await fetch("https://health.ex27.my.id/check?target=" + target)
+            const res = await fetch("https://health.ex27.workers.dev/check?target=" + target)
               .then(async (res) => {
                 if (isActive) return;
                 if (res.status == 200) {
