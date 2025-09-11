@@ -103,14 +103,14 @@ jobs:
           
           # Test health worker endpoints
           echo "Testing health worker status..."
-          curl -f "https://health.ex27.my.id/status" || echo "Custom domain test failed"
+          curl -f "https://health.ex27.workers.dev/status" || echo "Custom domain test failed"
           
           echo "Testing health check endpoint..."
-          curl -f "https://health.ex27.my.id/check?target=8.8.8.8:53" || echo "Health check test failed"
+          curl -f "https://health.ex27.workers.dev/check?target=8.8.8.8:53" || echo "Health check test failed"
           
           echo "Health worker deployment verification completed"
 
       - name: 🎤 Notice
         run: |
           echo "::notice::Health Worker deployed to ${WORKERS_ENV} / ${GIT_REF} @ ${COMMIT_SHA}"
-          echo "::notice::Available at: https://health.ex27.my.id"
+          echo "::notice::Available at: https://health.ex27.workers.dev"
