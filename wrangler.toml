@@ -1,12 +1,12 @@
-name = "vpn"
-main = "_worker.js"
+name = "proxy"
+main = "worker.js"
 compatibility_date = "2025-08-15"
 workers_dev = true
 preview_urls = false
 
-kv_namespaces = [
-  { binding = "PROXY_KV", id = "256ca79acb0b45aea02194d88b558ae6" }
-]
+#kv_namespaces = [
+#  { binding = "PROXY_KV", id = "256ca79acb0b45aea02194d88b558ae6" }
+#]
 
 [unsafe.metadata.observability]
 enabled = false
