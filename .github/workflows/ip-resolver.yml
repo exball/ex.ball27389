@@ -1,0 +1,121 @@
+name: 🔍 IP Resolver Worker
+on:
+  # Manual trigger with environment selection
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'wrangler env to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - prod
+        - one
+      commit:
+        description: 'git tip commit to deploy'
+        default: 'main'
+        required: true
+
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*"
+    # Only trigger when IP Resolver files change
+    paths:
+      - "IpResolver/ip-resolver.js"
+      - "IpResolver/wrangler-ip-resolver.toml"
+      - ".github/workflows/ip-resolver.yml"
+
+  repository_dispatch:
+
+env:
+  GIT_REF: ${{ github.event.inputs.commit || github.ref }}
+  # default is 'dev' which is really empty/no env
+  WORKERS_ENV: ''
+
+jobs:
+  deploy:
+    name: 🚀 Deploy IP Resolver Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: ${{ env.GIT_REF }}
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: 🛸 Env?
+        # 'dev' env deploys to default WORKERS_ENV, which is, '' (an empty string)
+        if: github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'one'
+        run: |
+          echo "WORKERS_ENV=${WENV}" >> $GITHUB_ENV
+          echo "COMMIT_SHA=${COMMIT_SHA}" >> $GITHUB_ENV
+        shell: bash
+        env:
+          WENV: ${{ github.event.inputs.environment }}
+          COMMIT_SHA: ${{ github.sha }}
+
+      - name: 🎱 Tag?
+        # Tagged deploys always deploy to prod
+        if: github.ref_type == 'tag'
+        run: |
+          echo "WORKERS_ENV=${WENV}" >> $GITHUB_ENV
+          echo "COMMIT_SHA=${COMMIT_SHA}" >> $GITHUB_ENV
+        shell: bash
+        env:
+          WENV: 'prod'
+          COMMIT_SHA: ${{ github.sha }}
+
+      # Install wrangler globally
+      - name: 🏗 Install Wrangler
+        run: npm install -g wrangler
+
+      - name: 🔍 Deploy IP Resolver Worker
+        working-directory: ./IpResolver
+        run: |
+          wrangler deploy --config wrangler-ip-resolver.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          WORKERS_ENV: ${{ env.WORKERS_ENV }}
+          GIT_COMMIT_ID: ${{ env.GIT_REF }}
+
+      - name: 🧪 Test IP Resolver
+        run: |
+          echo "Waiting for deployment to propagate..."
+          sleep 15
+          
+          # Test IP resolver endpoint
+          echo "Testing IP resolver endpoint..."
+          response=$(curl -s "https://resolver.ex27.my.id" || echo "Custom domain test failed")
+          
+          if echo "$response" | grep -q '"ip"'; then
+            echo "✅ IP Resolver is working correctly"
+            echo "Sample response: $(echo "$response" | head -c 200)..."
+          else
+            echo "❌ IP Resolver test failed"
+            echo "Response: $response"
+          fi
+          
+          # Test specific fields that should be present
+          echo "Testing response structure..."
+          if echo "$response" | grep -q '"country"' && echo "$response" | grep -q '"city"'; then
+            echo "✅ Response structure is correct"
+          else
+            echo "⚠️ Response structure may be incomplete"
+          fi
+          
+          echo "IP Resolver deployment verification completed"
+
+      - name: 🎤 Notice
+        run: |
+          echo "::notice::IP Resolver Worker deployed to ${WORKERS_ENV} / ${GIT_REF} @ ${COMMIT_SHA}"
+          echo "::notice::Available at: https://resolver.ex27.my.id"

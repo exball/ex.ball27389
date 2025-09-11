@@ -1,0 +1,116 @@
+name: 🏥 Health Worker
+on:
+  # Manual trigger with environment selection
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'wrangler env to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - prod
+        - one
+      commit:
+        description: 'git tip commit to deploy'
+        default: 'main'
+        required: true
+
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*"
+    # Only trigger when health-worker files change (excluding docs)
+    paths:
+      - "health-worker/_worker.js"
+      - "health-worker/wrangler.toml"
+      - "health-worker/package.json"
+      - ".github/workflows/health-worker.yml"
+
+  repository_dispatch:
+
+env:
+  GIT_REF: ${{ github.event.inputs.commit || github.ref }}
+  # default is 'dev' which is really empty/no env
+  WORKERS_ENV: ''
+
+jobs:
+  deploy:
+    name: 🚀 Deploy Health Worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: ${{ env.GIT_REF }}
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: 🛸 Env?
+        # 'dev' env deploys to default WORKERS_ENV, which is, '' (an empty string)
+        if: github.event.inputs.environment == 'prod' || github.event.inputs.environment == 'one'
+        run: |
+          echo "WORKERS_ENV=${WENV}" >> $GITHUB_ENV
+          echo "COMMIT_SHA=${COMMIT_SHA}" >> $GITHUB_ENV
+        shell: bash
+        env:
+          WENV: ${{ github.event.inputs.environment }}
+          COMMIT_SHA: ${{ github.sha }}
+
+      - name: 🎱 Tag?
+        # Tagged deploys always deploy to prod
+        if: github.ref_type == 'tag'
+        run: |
+          echo "WORKERS_ENV=${WENV}" >> $GITHUB_ENV
+          echo "COMMIT_SHA=${COMMIT_SHA}" >> $GITHUB_ENV
+        shell: bash
+        env:
+          WENV: 'prod'
+          COMMIT_SHA: ${{ github.sha }}
+
+      # Install dependencies for health-worker
+      - name: 🏗 Get dependencies
+        working-directory: ./health-worker
+        run: |
+          if [ -f package.json ]; then
+            npm i
+          else
+            echo "No package.json found, skipping npm install"
+          fi
+
+      - name: 🏥 Deploy Health Worker
+        working-directory: ./health-worker
+        run: |
+          npm install -g wrangler
+          wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          WORKERS_ENV: ${{ env.WORKERS_ENV }}
+          GIT_COMMIT_ID: ${{ env.GIT_REF }}
+
+      - name: 🩺 Health Check
+        run: |
+          echo "Waiting for deployment to propagate..."
+          sleep 10
+          
+          # Test health worker endpoints
+          echo "Testing health worker status..."
+          curl -f "https://health.ex27.my.id/status" || echo "Custom domain test failed"
+          
+          echo "Testing health check endpoint..."
+          curl -f "https://health.ex27.my.id/check?target=8.8.8.8:53" || echo "Health check test failed"
+          
+          echo "Health worker deployment verification completed"
+
+      - name: 🎤 Notice
+        run: |
+          echo "::notice::Health Worker deployed to ${WORKERS_ENV} / ${GIT_REF} @ ${COMMIT_SHA}"
+          echo "::notice::Available at: https://health.ex27.my.id"
