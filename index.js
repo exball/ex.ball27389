@@ -1,12 +1,12 @@
 import { connect } from "cloudflare:sockets";
 
 // Variables
-const rootDomain = ""; // Ganti dengan domain utama kalian
-const serviceName = ""; // Ganti dengan nama workers kalian
-const apiKey = "fd337fa91b9a1fc4d867f941d560dbbeb7c19"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
-const apiEmail = "ex.bal27389@gmail.com"; // Ganti dengan email yang kalian gunakan
-const accountID = "1f8c8ff6943731c4bf5fa0705311fe98"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
-const zoneID = "0a3a59fed4f26e128ab1ae2eb59f252a"; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+const rootDomain = "ex27.workers.dev"; // Ganti dengan domain utama kalian
+const serviceName = "vpn"; // Ganti dengan nama workers kalian
+const apiKey = "49ab60d920053a8fc7b6f645f17afc1d4d58d"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
+const apiEmail = "ex.ball27389@gmail.com"; // Ganti dengan email yang kalian gunakan
+const accountID = "afcfd0904cfac6d343d3e7478105af8d"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+const zoneID = ""; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
 let isApiReady = false;
 let proxyIP = "";
 let cachedProxyList = [];
@@ -20,7 +20,7 @@ const KV_PROXY_KEY = "kvProxyList.json";
 
 const DNS_SERVER_ADDRESS = "8.8.8.8";
 const DNS_SERVER_PORT = 53;
-const PROXY_HEALTH_CHECK_API = `https://health.ex27.my.id/check`; // Menggunakan dedicated health worker
+const PROXY_HEALTH_CHECK_API = `https://health.ex27.workers.dev/check`; // Menggunakan dedicated health worker
 const CONVERTER_URL = "https://api.foolvpn.me/convert";
 const DONATE_LINK = "https://trakteer.id/dickymuliafiqri/tip";
 const PROXY_PER_PAGE = 24;
