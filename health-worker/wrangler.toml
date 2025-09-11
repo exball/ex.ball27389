@@ -1,0 +1,15 @@
+name = "health-worker"
+main = "_worker.js"
+compatibility_date = "2023-08-23"
+workers_dev = false
+preview_urls = false
+
+routes = [
+  { pattern = "health.exbal.my.id", custom_domain = true }
+]
+
+[unsafe.metadata.observability]
+enabled = true
+
+[observability.logs]
+enabled = true

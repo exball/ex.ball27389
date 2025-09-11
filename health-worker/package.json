@@ -1,0 +1,25 @@
+{
+  "name": "health-worker",
+  "version": "1.0.0",
+  "description": "Dedicated Health Check Worker for Proxy Testing",
+  "main": "_worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
+    "tail": "wrangler tail",
+    "test": "wrangler dev --local"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "proxy",
+    "health-check",
+    "geolocation",
+    "performance"
+  ],
+  "author": "exbal.my.id",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
