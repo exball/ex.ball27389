@@ -9,8 +9,9 @@ kv_namespaces = [
 ]
 
 [unsafe.metadata.observability]
-enabled = true
+enabled = false
 
 [observability]
 enabled = true
-head_sampling_rate = 1
+head_sampling_rate = 0.05
+tail_sampling_rate = 0.01
