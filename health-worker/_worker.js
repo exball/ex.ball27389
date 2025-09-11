@@ -494,7 +494,7 @@ async function handleRequest(request) {
         
         <h3>💡 Example Usage:</h3>
         <div class="endpoint">
-            <code>https://health.exbal.my.id/check?target=43.218.77.16:1443</code>
+            <code>https://health.ex27.workers.dev/check?target=43.218.77.16:1443</code>
         </div>
         
         <p><small>🚀 Enhanced Performance & Accuracy | Version 2.0.0</small></p>
