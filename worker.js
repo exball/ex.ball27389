@@ -1,12 +1,13 @@
-
 import { connect } from "cloudflare:sockets";
 
 // Variables
-const rootDomain = "ex27.workers.dev"; // Ganti dengan domain utama kalian
-const serviceName = "proxy"; // Ganti dengan nama workers kalian
-const apiKey = ""; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
-const apiEmail = ""; // Ganti dengan email yang kalian gunakan
-const accountID = ""; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
+let rootDomain = "ex27.workers.dev";
+let serviceName = "proxy";
+let APP_DOMAIN = "proxy.ex27.workers.dev";
+
+const apiKey = "49ab60d920053a8fc7b6f645f17afc1d4d58d"; // Ganti dengan Global API key kalian (https://dash.cloudflare.com/profile/api-tokens)
+const apiEmail = "ex.ball27389@gmail.com"; // Ganti dengan email yang kalian gunakan
+const accountID = "afcfd0904cfac6d343d3e7478105af8d"; // Ganti dengan Account ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
 const zoneID = ""; // Ganti dengan Zone ID kalian (https://dash.cloudflare.com -> Klik domain yang kalian gunakan)
 let isApiReady = false;
 let prxIP = "";
@@ -18,7 +19,6 @@ const flash = "dm1lc3M=";
 const v2 = "djJyYXk=";
 const neko = "Y2xhc2g=";
 
-const APP_DOMAIN = `${serviceName}.${rootDomain}`;
 const PORTS = [443, 80];
 const PROTOCOLS = [atob(horse), atob(flash), "ss"];
 const SUB_PAGE_URL = "https://foolvpn.me/nautica";
@@ -111,6 +111,10 @@ export default {
   async fetch(request, env, ctx) {
     try {
       const url = new URL(request.url);
+      APP_DOMAIN = url.hostname;
+      serviceName = APP_DOMAIN.split(".")[0];
+      rootDomain = APP_DOMAIN.replace(`${serviceName}.`, "");
+
       const upgradeHeader = request.headers.get("Upgrade");
 
       // Gateway check
@@ -138,7 +142,7 @@ export default {
       }
 
       if (url.pathname.startsWith("/sub")) {
-        return Response.redirect(SUB_PAGE_URL, 301);
+        return Response.redirect(SUB_PAGE_URL + `?host=${APP_DOMAIN}`, 301);
       } else if (url.pathname.startsWith("/check")) {
         const target = url.searchParams.get("target").split(":");
         const result = await checkPrxHealth(target[0], target[1] || "443");
